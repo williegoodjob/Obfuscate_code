@@ -1,3 +1,8 @@
+"""
+Copyright (c) 2024 豆伯
+
+This software is licensed under the MIT License. See LICENSE for details.
+"""
 import ast
 import random
 import keyword
