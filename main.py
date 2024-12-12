@@ -7,12 +7,35 @@ from CodeObfuscator import CodeObfuscator
 import tkinter as tk
 from tkinter import ttk, filedialog
 from pathlib import Path
+from faker import Faker
 
 class ObfuscatorGUI:
     def __init__(self):
         self.window = tk.Tk()
         self.window.title("Python 程式碼混淆器")
-        self.window.geometry("600x300")
+        self.window.geometry("600x500")  # 調整視窗高度
+        
+        # Faker 語言選擇區域
+        faker_frame = ttk.LabelFrame(self.window, text="Faker 語言設定", padding=10)
+        faker_frame.pack(fill="x", padx=10, pady=5)
+        
+        self.faker_langs = {
+            "不使用Faker": None,
+            "繁體中文": "zh_TW",
+            "簡體中文": "zh_CN",
+            "英文": "en_US",
+            "日文": "ja_JP",
+            "韓文": "ko_KR"
+        }
+        
+        self.faker_var = tk.StringVar(value="不使用Faker")
+        faker_combo = ttk.Combobox(
+            faker_frame, 
+            textvariable=self.faker_var,
+            values=list(self.faker_langs.keys()),
+            state="readonly"
+        )
+        faker_combo.pack(fill="x")
         
         # 輸入檔案區域
         input_frame = ttk.LabelFrame(self.window, text="輸入檔案", padding=10)
@@ -35,8 +58,13 @@ class ObfuscatorGUI:
         length_frame.pack(fill="x", padx=10, pady=5)
         
         self.length = tk.IntVar(value=64)
-        length_scale = ttk.Scale(length_frame, from_=8, to=128, 
-                               variable=self.length, orient="horizontal")
+        length_scale = tk.Scale(
+            length_frame, from_=1,
+            to=1024,
+            variable=self.length,
+            orient="horizontal",
+            resolution = 1
+        )
         length_scale.pack(fill="x")
         
         length_label = ttk.Label(length_frame, textvariable=self.length)
@@ -78,7 +106,18 @@ class ObfuscatorGUI:
             return
             
         try:
-            ob = CodeObfuscator(length=self.length.get())
+            # 根據選擇的語言設定 Faker
+            faker_lang = self.faker_langs[self.faker_var.get()]
+            if faker_lang:
+                fake = Faker(faker_lang)
+                name_generator = lambda: fake.name().replace(' ', '_')
+                ob = CodeObfuscator(
+                    name_generator=name_generator,
+                    length=self.length.get()
+                )
+            else:
+                ob = CodeObfuscator(length=self.length.get())
+                
             ob.obfuscate(input_file, output_file)
             self.status_var.set("混淆完成！")
         except Exception as e:
