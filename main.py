@@ -26,7 +26,7 @@ class ObfuscatorGUI:
             "英文": "en_US",
             "日文": "ja_JP",
             "韓文": "ko_KR",
-            "混合語言(zh+en)": ["zh_TW", "en_US", "zh_CN", "ja_JP", "ko_KR"]
+            "混合語言(all)": ["zh_TW", "en_US", "zh_CN", "ja_JP", "ko_KR"]
         }
         
         self.faker_var = tk.StringVar(value="不使用Faker")
