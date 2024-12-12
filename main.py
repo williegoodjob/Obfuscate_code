@@ -25,7 +25,8 @@ class ObfuscatorGUI:
             "簡體中文": "zh_CN",
             "英文": "en_US",
             "日文": "ja_JP",
-            "韓文": "ko_KR"
+            "韓文": "ko_KR",
+            "混合語言(zh+en)": ["zh_TW", "en_US", "zh_CN", "ja_JP", "ko_KR"]
         }
         
         self.faker_var = tk.StringVar(value="不使用Faker")
@@ -58,17 +59,42 @@ class ObfuscatorGUI:
         length_frame.pack(fill="x", padx=10, pady=5)
         
         self.length = tk.IntVar(value=64)
+        self.multiplier = tk.IntVar(value=1)  # 新增倍數變數
+
+        # 長度滑桿
         length_scale = tk.Scale(
-            length_frame, from_=1,
+            length_frame, 
+            from_=1,
             to=1024,
             variable=self.length,
             orient="horizontal",
-            resolution = 1
+            resolution=1,
+            label="基礎長度"
         )
         length_scale.pack(fill="x")
-        
-        length_label = ttk.Label(length_frame, textvariable=self.length)
-        length_label.pack()
+
+        # 倍數滑桿
+        multiplier_scale = tk.Scale(
+            length_frame,
+            from_=1,
+            to=10,
+            variable=self.multiplier,
+            orient="horizontal",
+            resolution=1,
+            label="倍數"
+        )
+        multiplier_scale.pack(fill="x")
+
+        # 顯示最終長度
+        def update_final_length(*args):
+            final_length = self.length.get() * self.multiplier.get()
+            final_length_label.config(text=f"最終長度: {final_length}")
+
+        self.length.trace("w", update_final_length)
+        self.multiplier.trace("w", update_final_length)
+
+        final_length_label = ttk.Label(length_frame)
+        final_length_label.pack()
         
         # 執行按鈕
         ttk.Button(self.window, text="執行混淆", command=self.run_obfuscation).pack(pady=20)
@@ -105,23 +131,25 @@ class ObfuscatorGUI:
             self.status_var.set("錯誤：請選擇輸入和輸出檔案")
             return
             
+        final_length = self.length.get() * self.multiplier.get()
+        
         try:
             # 根據選擇的語言設定 Faker
             faker_lang = self.faker_langs[self.faker_var.get()]
             if faker_lang:
                 fake = Faker(faker_lang)
-                name_generator = lambda: fake.name().replace(' ', '_')
+                name_generator = lambda: ''.join(fake.name().replace(' ', '_').replace('.','') + ('_' if i < final_length-1 else '') for i, _ in enumerate(range(final_length)))
                 ob = CodeObfuscator(
                     name_generator=name_generator,
-                    length=self.length.get()
+                    length=final_length  # 使用計算後的長度
                 )
             else:
-                ob = CodeObfuscator(length=self.length.get())
+                ob = CodeObfuscator(length=final_length)  # 使用計算後的長度
                 
             ob.obfuscate(input_file, output_file)
-            self.status_var.set("混淆完成！")
+            self.status_var.set("✅混淆完成！")
         except Exception as e:
-            self.status_var.set(f"錯誤：{str(e)}")
+            self.status_var.set(f"❎錯誤：{str(e)}")
     
     def run(self):
         self.window.mainloop()
