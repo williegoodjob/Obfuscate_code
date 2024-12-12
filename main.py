@@ -1,3 +1,8 @@
+"""
+Copyright (c) 2024 豆伯
+
+This software is licensed under the MIT License. See LICENSE for details.
+"""
 import ast
 import random
 import keyword
@@ -9,17 +14,18 @@ from faker import Faker
 fake = Faker('zh_TW')
 
 def get_builtin_names():
-    """獲取所有內建函數、關鍵字和模組別名名稱"""
     builtin_names = set(dir(builtins))
     builtin_names.update(keyword.kwlist)
     builtin_names.update({'__name__', '__main__'})
     return builtin_names
 
-def random_string(length=1024):
+def random_string(mode = 'code',length=64):
     letters = string.ascii_letters + string.digits
     while True:
-        # new_name = ''.join(random.choice(letters) for _ in range(length))
-        new_name = ''.join(fake.name() for _ in range(length))
+        if mode == 'code':
+            new_name = ''.join(random.choice(letters) for _ in range(length))
+        elif mode == 'name':
+            new_name = ''.join(fake.name() for _ in range(length))
         if not new_name[0].isdigit() and new_name not in keyword.kwlist:
             return new_name
 
@@ -113,5 +119,24 @@ def obfuscate_code(filename):
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(new_source)
 
-# 使用範例
-obfuscate_code('testPY.py')
+def main():
+    if len(sys.argv) < 2:
+        print("使用方法：python main.py <輸入文件> [輸出文件]")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+
+    if len(sys.argv) >= 3:
+        output_file = sys.argv[2]
+    else:
+        output_file = 'default_output.py'  # 預設輸出文件名
+
+    # 在此處加入處理代碼
+    with open(input_file, 'r') as input_stream, open(output_file, 'w') as output_stream:
+        # 例如，將輸入文件的內容複製到輸出文件
+        for line in input_stream:
+            output_stream.write(line)
+    obfuscate_code(output_file)
+
+if __name__ == "__main__":
+    main()
