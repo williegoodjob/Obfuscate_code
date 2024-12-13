@@ -8,6 +8,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 from pathlib import Path
 from faker import Faker
+import random
 
 class ObfuscatorGUI:
     def __init__(self):
@@ -58,12 +59,15 @@ class ObfuscatorGUI:
         length_frame = ttk.LabelFrame(self.window, text="混淆長度設定", padding=10)
         length_frame.pack(fill="x", padx=10, pady=5)
         
-        self.length = tk.IntVar(value=64)
-        self.multiplier = tk.IntVar(value=1)  # 新增倍數變數
+        self.length = tk.IntVar(value=10)
+        self.multiplier = tk.IntVar(value=1)
 
-        # 長度滑桿
+        # 基礎長度設定區域
+        base_length_frame = ttk.Frame(length_frame)
+        base_length_frame.pack(fill="x", pady=5)
+
         length_scale = tk.Scale(
-            length_frame, 
+            base_length_frame, 
             from_=1,
             to=1024,
             variable=self.length,
@@ -71,11 +75,20 @@ class ObfuscatorGUI:
             resolution=1,
             label="基礎長度"
         )
-        length_scale.pack(fill="x")
+        length_scale.pack(side="left", fill="x", expand=True)
 
-        # 倍數滑桿
+        ttk.Button(
+            base_length_frame,
+            text="隨機長度",
+            command=lambda: self.length.set(random.randint(1, 1024))
+        ).pack(side="left", padx=5)
+
+        # 倍數設定區域
+        multiplier_frame = ttk.Frame(length_frame)
+        multiplier_frame.pack(fill="x", pady=5)
+
         multiplier_scale = tk.Scale(
-            length_frame,
+            multiplier_frame,
             from_=1,
             to=10,
             variable=self.multiplier,
@@ -83,7 +96,13 @@ class ObfuscatorGUI:
             resolution=1,
             label="倍數"
         )
-        multiplier_scale.pack(fill="x")
+        multiplier_scale.pack(side="left", fill="x", expand=True)
+
+        ttk.Button(
+            multiplier_frame,
+            text="隨機倍數",
+            command=lambda: self.multiplier.set(random.randint(1, 10))
+        ).pack(side="left", padx=5)
 
         # 顯示最終長度
         def update_final_length(*args):
