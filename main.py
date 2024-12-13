@@ -9,12 +9,13 @@ from tkinter import ttk, filedialog
 from pathlib import Path
 from faker import Faker
 import random
+import string
 
 class ObfuscatorGUI:
     def __init__(self):
         self.window = tk.Tk()
         self.window.title("Python 程式碼混淆器")
-        self.window.geometry("600x500")  # 調整視窗高度
+        self.window.geometry("600x650")  # 調整視窗高度
         
         # Faker 語言選擇區域
         faker_frame = ttk.LabelFrame(self.window, text="Faker 語言設定", padding=10)
@@ -108,6 +109,7 @@ class ObfuscatorGUI:
         def update_final_length(*args):
             final_length = self.length.get() * self.multiplier.get()
             final_length_label.config(text=f"最終長度: {final_length}")
+            update_preview()
 
         self.length.trace("w", update_final_length)
         self.multiplier.trace("w", update_final_length)
@@ -115,6 +117,33 @@ class ObfuscatorGUI:
         final_length_label = ttk.Label(length_frame)
         final_length_label.pack()
         
+        # 預覽視窗
+        preview_frame = ttk.LabelFrame(self.window, text="名稱預覽", padding=10)
+        preview_frame.pack(fill="x", padx=10, pady=5)
+
+        preview_text = tk.Text(preview_frame, height=5)
+        preview_text.pack(fill="x")
+
+        def update_preview():
+            # 清除現有內容
+            preview_text.delete("1.0", tk.END)
+            final_length = self.length.get() * self.multiplier.get()
+            faker_lang = self.faker_langs.get(self.faker_var.get())
+            if faker_lang:
+                fake = Faker(faker_lang)
+                names = [fake.name().replace(' ', '_').replace('.','') + ('_' if i < final_length-1 else '') for i, _ in enumerate(range(final_length))]# for _ in range(5)]
+            else:
+                letters = string.ascii_letters + string.digits
+                names = [''.join(random.choice(letters) for _ in range(final_length))]# for _ in range(5)]
+            
+            preview_text.insert(tk.END, names)
+
+        # 初始更新預覽
+        update_preview()
+
+        # 在語言選擇變化時更新預覽
+        self.faker_var.trace("w", lambda *args: update_preview())
+
         # 執行按鈕
         ttk.Button(self.window, text="執行混淆", command=self.run_obfuscation).pack(pady=20)
         
