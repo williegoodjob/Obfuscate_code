@@ -7,7 +7,6 @@ import ast
 import random
 import keyword
 import string
-import sys
 import builtins
 from typing import Callable
 
