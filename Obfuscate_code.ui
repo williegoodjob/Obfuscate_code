@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Python混淆器</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QGroupBox" name="groupBox">
@@ -182,12 +182,12 @@
       <string>開始混淆</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="Result_Label">
      <property name="geometry">
       <rect>
        <x>20</x>
        <y>30</y>
-       <width>111</width>
+       <width>291</width>
        <height>31</height>
       </rect>
      </property>
