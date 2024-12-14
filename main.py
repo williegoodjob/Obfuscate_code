@@ -28,9 +28,10 @@ class ObfuscatorGUI(QMainWindow):
         self.setAcceptDrops(True)
         self.Obfuscate_Mode.addItems(self.ModeItems)
         self.Mode = self.Obfuscate_Mode.currentText()
-        self.InputFile_LineEdit.setText("尚未選擇文件")
-        self.OutputFile_LineEdit.setText("尚未選擇文件")
-        self.Result_TextBrowser.setPlainText("歡迎使用代碼混淆器，請選擇輸入和輸出文件，然後點擊開始混淆。")
+        self.InputFile_LineEdit.setText("⚠️尚未選擇文件⚠️")
+        self.OutputFile_LineEdit.setText("⚠️尚未選擇文件⚠️")
+        self.Result_TextBrowser.setPlainText("請選擇輸入和輸出文件，然後點擊開始混淆。")
+        self.set_Result_Label("❓未執行❓")
         
         # 綁定事件
         self.InputFile_Button.clicked.connect(self.select_input_file)
@@ -45,6 +46,9 @@ class ObfuscatorGUI(QMainWindow):
         
         # 初始化預覽
         self.update_preview()
+
+    def set_Result_Label(self, text):
+        self.Result_Label.setText("執行結果:"+text)
 
     def input_path_changed(self, text):
         self.InputFilePath = text
@@ -90,7 +94,10 @@ class ObfuscatorGUI(QMainWindow):
     
     def select_output_file(self):
         # 開啟文件保存對話框並將選定路徑設置到文字框
-        self.OutputFilePath, _ = QFileDialog.getSaveFileName(self, "選擇輸出文件",filter="Python Files (*.py)")
+        if self.OutputFilePath:
+            self.OutputFilePath, _ = QFileDialog.getSaveFileName(self, "選擇輸出文件",filter="Python Files (*.py)", directory=self.OutputFilePath)
+        else:
+            self.OutputFilePath, _ = QFileDialog.getSaveFileName(self, "選擇輸出文件",filter="Python Files (*.py)")
         if self.OutputFilePath:
             self.OutputFile_LineEdit.setText(self.OutputFilePath)
 
@@ -136,11 +143,14 @@ class ObfuscatorGUI(QMainWindow):
                         length=self.Length
                     )
                 ob.obfuscate(self.InputFilePath, self.OutputFilePath)
-                self.Result_TextBrowser.setPlainText("✅混淆完成，請檢查輸出文件✅")
+                self.set_Result_Label("✅完成✅")
+                self.Result_TextBrowser.setPlainText("無錯誤，請檢查輸出文件")
             except Exception as e:
-                self.Result_TextBrowser.setPlainText(f"❗發生錯誤❗：\n{str(e)}")
+                self.set_Result_Label("❗錯誤❗")
+                self.Result_TextBrowser.setPlainText(f"發生例外情況：\n{str(e)}")
         else:
-            self.Result_TextBrowser.setPlainText("❗請選擇輸入和輸出文件❗")
+            self.set_Result_Label("❗錯誤❗")
+            self.Result_TextBrowser.setPlainText("請設定輸入和輸出文件")
             
 if __name__ == "__main__":
     app = QApplication([])
