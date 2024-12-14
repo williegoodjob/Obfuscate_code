@@ -141,6 +141,7 @@ class ObfuscatorGUI(QMainWindow):
                 self.Result_TextBrowser.setPlainText(f"❗發生錯誤❗：\n{str(e)}")
         else:
             self.Result_TextBrowser.setPlainText("❗請選擇輸入和輸出文件❗")
+            
 if __name__ == "__main__":
     app = QApplication([])
     window = ObfuscatorGUI()
