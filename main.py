@@ -144,6 +144,7 @@ class ObfuscatorGUI(QMainWindow):
             data = json.load(f)
             for i, item in enumerate(data):
                 # 處理預設值
+                enabled = item.get('enabled', True)
                 mode = item.get('mode', 'normal')
                 fake_langs = item.get('fakeLangs', None)
                 range_val = item.get('range', [10, 10])
@@ -152,33 +153,34 @@ class ObfuscatorGUI(QMainWindow):
                 subject = item.get('subject', None)
                 content = item.get('content', None)
                 
-                # 更新表格顯示
-                if mode != 'normal' and mode != 'Normal':
-                    row = [
-                        QStandardItem(name), 
-                        QStandardItem(str(fake_langs)), 
-                        QStandardItem(f"{range_val[0]} - {range_val[1]}"), 
-                        QStandardItem(email)
-                    ]
-                else:
-                    row = [
-                        QStandardItem(name), 
-                        QStandardItem("英數亂碼"), 
-                        QStandardItem(f"{range_val[0]} - {range_val[1]}"), 
-                        QStandardItem(email)
-                    ]
-                model.appendRow(row)
+                if enabled:
+                    # 更新表格顯示
+                    if mode != 'normal' and mode != 'Normal':
+                        row = [
+                            QStandardItem(name), 
+                            QStandardItem(str(fake_langs)), 
+                            QStandardItem(f"{range_val[0]} - {range_val[1]}"), 
+                            QStandardItem(email)
+                        ]
+                    else:
+                        row = [
+                            QStandardItem(name), 
+                            QStandardItem("英數亂碼"), 
+                            QStandardItem(f"{range_val[0]} - {range_val[1]}"), 
+                            QStandardItem(email)
+                        ]
+                    model.appendRow(row)
                 
-                # 更新郵件佇列
-                self.EmailQueue.append([
-                    mode,
-                    fake_langs,
-                    range_val,
-                    email,
-                    name,
-                    subject,
-                    content
-                ])
+                    # 更新郵件佇列
+                    self.EmailQueue.append([
+                        mode,
+                        fake_langs,
+                        range_val,
+                        email,
+                        name,
+                        subject,
+                        content
+                    ])
 
     def select_input_file(self):
         # 開啟文件選擇器並將選定文件路徑設置到文字框
