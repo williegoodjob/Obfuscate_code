@@ -136,15 +136,45 @@ class ObfuscatorGUI(QMainWindow):
         model.clear()
         model.setHorizontalHeaderLabels(['名稱', '模式', '亂數範圍', '地址'])
         self.EmailQueue.clear()
+        
         with open(self.EmailFilePath, 'r', encoding='utf-8') as f:
             data = json.load(f)
             for i, item in enumerate(data):
-                if item['mode'] != 'normal':
-                    row = [QStandardItem(item['name']), QStandardItem(str(item['fakeLangs'])), QStandardItem(f"{item['range'][0]} - {item['range'][1]}"), QStandardItem(item['email'])]
+                # 處理預設值
+                mode = item['mode']
+                fake_langs = item.get('fakeLangs', None)
+                range_val = item.get('range', [64, 64])
+                email = item['email']  # 必要欄位
+                name = item['name']    # 必要欄位
+                subject = item.get('subject', self.EmailDefaultSubject)
+                content = item.get('content', self.EmailDefaultContent)
+                
+                # 更新表格顯示
+                if mode != 'normal':
+                    row = [
+                        QStandardItem(name), 
+                        QStandardItem(str(fake_langs)), 
+                        QStandardItem(f"{range_val[0]} - {range_val[1]}"), 
+                        QStandardItem(email)
+                    ]
                 else:
-                    row = [QStandardItem(item['name']), QStandardItem(item['mode']), QStandardItem(f"{item['range'][0]} - {item['range'][1]}"), QStandardItem(item['email'])]
+                    row = [
+                        QStandardItem(name), 
+                        QStandardItem(mode), 
+                        QStandardItem(f"{range_val[0]} - {range_val[1]}"), 
+                        QStandardItem(email)
+                    ]
                 model.appendRow(row)
-                self.EmailQueue.append([item['mode'],item['fakeLangs'],item['range'],item['email']])
+                
+                # 更新郵件佇列
+                self.EmailQueue.append([
+                    mode,
+                    fake_langs,
+                    range_val,
+                    email,
+                    subject,
+                    content
+                ])
 
     def select_input_file(self):
         # 開啟文件選擇器並將選定文件路徑設置到文字框
@@ -239,45 +269,59 @@ class ObfuscatorGUI(QMainWindow):
                 total = len(self.EmailQueue)
                 success = 0
                 
-                for mode, fakeLangs, range_val, email in self.EmailQueue:
+                for mode, fakeLangs, range_val, email, subject, content in self.EmailQueue:
+                    print(f"Processing {email}...")
+                    output_file = str(Path(self.OutputFilePath).parent / f"obfuscated_{email.split('@')[0]}_{Path(self.InputFilePath).name}")
+
                     try:
-                        # 為每個收件者生成獨特的混淆程式碼
-                        output_file = str(Path(self.OutputFilePath).parent / f"obfuscated_{email.split('@')[0]}_{Path(self.InputFilePath).name}")
+                        # 確保 range_val 存在且有效
+                        if not range_val or len(range_val) < 2:
+                            range_val = [8, 12]  # 設定預設值
+                        
+                        length = random.randint(range_val[0], range_val[1])
                         
                         # 根據模式設定混淆器
                         if mode != "normal":  # normal 使用預設的 ascii 英數
-                            fake = Faker(fakeLangs)  # 可以根據需求調整語言
-                            length = random.randint(range_val[0], range_val[1]+1)
-                            name_generator = lambda: ''.join(fake.name().replace(' ', '_').replace('.','') + ('_' if i < random.randint(range_val[0], range_val[1])-1 else '') for i, _ in enumerate(range(length)))
+                            fake = Faker(fakeLangs)
+                            def name_generator():
+                                name_parts = []
+                                for i in range(length):
+                                    name = fake.name().replace(' ', '_').replace('.', '')
+                                    if i < length - 1:
+                                        name += '_'
+                                    name_parts.append(name)
+                                return ''.join(name_parts)
+                            
                             ob = CodeObfuscator(
                                 name_generator=name_generator,
-                                length=random.randint(range_val[0], range_val[1])
+                                length=length
                             )
                         else:
                             ob = CodeObfuscator(
-                                length=random.randint(range_val[0], range_val[1])
+                                length=length
                             )
                         
                         # 生成混淆後的程式碼
                         ob.obfuscate(self.InputFilePath, output_file)
-                        
+
                         # 發送郵件
                         status = mailer.send(
                             to=email,
-                            subject=self.EmailDefaultSubject,
-                            content=self.EmailDefaultContent,
+                            subject=subject,
+                            content=content,
                             attach_file=output_file
                         )
                         
                         if not status:
                             success += 1
                             os.remove(output_file)
-                        
-                        # 更新UI
-                        self.Email_Result.setText(f"執行結果：\n處理中... {success}/{total}")
-                        
                     except Exception as e:
-                        print(f"Error sending to {email}: {str(e)}")
+                        print(f"Error processing {email}: {str(e)}")
+                        if os.path.exists(output_file):
+                            os.remove(output_file)
+                        
+                    # 更新UI
+                    self.Email_Result.setText(f"執行結果：\n處理中... {success}/{total}")
                         
                 # 完成後更新UI
                 self.Email_Result.setText(f"執行結果：\n🆗完成！\n✅成功: {success}\n❌失敗: {total-success}")
