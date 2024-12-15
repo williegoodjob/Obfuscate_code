@@ -7,7 +7,7 @@ from CodeObfuscator import CodeObfuscator
 from SendMail import SendMail
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableView
-from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QStandardItemModel, QStandardItem, QIcon
 from pathlib import Path
 from faker import Faker
 from queue import Queue, Empty
@@ -36,6 +36,7 @@ class ObfuscatorGUI(QMainWindow):
         self.EmailDefaultContent = "這是您的混淆後程式碼，請查收附件。"
 
         # 設定元件初始值
+        self.setWindowIcon(QIcon(":/Image/fox.png"));
         self.groupBox_3.setAcceptDrops(True)
         self.groupBox_9.setAcceptDrops(True)
         self.Obfuscate_Mode.addItems(self.ModeItems)

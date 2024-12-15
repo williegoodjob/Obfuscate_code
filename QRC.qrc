@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="Image">
+    <file>fox.png</file>
+  </qresource>
+</RCC>
