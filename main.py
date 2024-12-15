@@ -30,6 +30,8 @@ class ObfuscatorGUI(QMainWindow):
         self.Length =self.Length_SpinBox.value()
         self.EmailQueue = []
         self.EmailFilePath = ""
+        self.EmailDefaultSubject = "混淆後的程式碼"
+        self.EmailDefaultContent = "這是您的混淆後程式碼，請查收附件。"
 
         # 設定元件初始值
         self.groupBox_3.setAcceptDrops(True)
@@ -41,6 +43,8 @@ class ObfuscatorGUI(QMainWindow):
         self.Result_TextBrowser.setPlainText("請選擇輸入和輸出文件，然後點擊開始混淆。")
         self.set_Result_Label("❓未執行❓")
         self.Email_Filename.setText("⚠️無文件⚠️")
+        self.subject_textEdit.setPlainText(self.EmailDefaultSubject)
+        self.content_textEdit.setPlainText(self.EmailDefaultContent)
 
         # 初始化Email預覽表格
         self.Email_preview.setModel(QStandardItemModel())
@@ -60,6 +64,8 @@ class ObfuscatorGUI(QMainWindow):
         self.Obfuscate_Mode.currentTextChanged.connect(self.set_mode)
         self.Email_openfile.clicked.connect(self.select_Email_file)
         self.Email_send.clicked.connect(self.send_email)
+        self.subject_textEdit.textChanged.connect(lambda: setattr(self, 'EmailDefaultSubject', self.subject_textEdit.toPlainText()))
+        self.content_textEdit.textChanged.connect(lambda: setattr(self, 'EmailDefaultContent', self.content_textEdit.toPlainText()))
 
         self.groupBox_3.dragEnterEvent = self.input_dragEnterEvent
         self.groupBox_3.dragMoveEvent = self.input_dragMoveEvent
@@ -258,8 +264,8 @@ class ObfuscatorGUI(QMainWindow):
                         # 發送郵件
                         status = mailer.send(
                             to=email,
-                            subject="混淆後的程式碼",
-                            content="這是您的混淆後程式碼，請查收附件。",
+                            subject=self.EmailDefaultSubject,
+                            content=self.EmailDefaultContent,
                             attach_file=output_file
                         )
                         
