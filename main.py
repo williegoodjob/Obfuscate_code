@@ -326,7 +326,7 @@ class ObfuscatorGUI(QMainWindow):
                     self.Email_Result.setText(f"執行結果：\n處理中... {success}/{total}")
                         
                 # 完成後更新UI
-                self.Email_Result.setText(f"執行結果：\n🆗完成！\n✅成功: {success}\n❌失敗: {total-success}")
+                self.Email_Result.setText(f"執行結果：🆗完成！\n✅成功: {success}\n❌失敗: {total-success}")
                 
             except Exception as e:
                 self.Email_Result.setText(f"執行結果：\n❌發生錯誤：\n{str(e)}")
