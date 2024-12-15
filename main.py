@@ -25,18 +25,20 @@ class ObfuscatorGUI(QMainWindow):
         super().__init__()
         uic.loadUi("Obfuscate_code.ui", self)
         # 宣告屬性
-        self.ModeItems = ['隨機ascii英數', '混合姓名', '繁中姓名', '簡中姓名', '英文姓名', '日文姓名', '韓文姓名']
-        self.fakeLangs = [None, ['zh_TW', 'zh_CN', 'en_US', 'ja_JP', 'ko_KR'], 'zh_TW', 'zh_CN', 'en_US', 'ja_JP', 'ko_KR']
+        self.ModeItems = ['隨機ascii英數', '混合姓名',
+                          '繁中姓名', '簡中姓名', '英文姓名', '日文姓名', '韓文姓名']
+        self.fakeLangs = [None, ['zh_TW', 'zh_CN', 'en_US', 'ja_JP',
+                                 'ko_KR'], 'zh_TW', 'zh_CN', 'en_US', 'ja_JP', 'ko_KR']
         self.InputFilePath = ""
         self.OutputFilePath = ""
-        self.Length =self.Length_SpinBox.value()
+        self.Length = self.Length_SpinBox.value()
         self.EmailQueue = []
         self.EmailFilePath = ""
         self.EmailDefaultSubject = "混淆後的程式碼"
         self.EmailDefaultContent = "這是您的混淆後程式碼，請查收附件。"
 
         # 設定元件初始值
-        self.setWindowIcon(QIcon(":/Image/fox.png"));
+        self.setWindowIcon(QIcon(":/Image/fox.png"))
         self.groupBox_3.setAcceptDrops(True)
         self.groupBox_9.setAcceptDrops(True)
         self.Obfuscate_Mode.addItems(self.ModeItems)
@@ -55,7 +57,8 @@ class ObfuscatorGUI(QMainWindow):
         self.Email_preview.setEditTriggers(QTableView.NoEditTriggers)
         model = self.Email_preview.model()
         model.setHorizontalHeaderLabels(['名稱', '模式', '亂數範圍', '地址'])
-        
+        self.UpdateEmailPath("./UserConfig/default.json")
+
         # 綁定事件
         self.InputFile_Button.clicked.connect(self.select_input_file)
         self.OutputFile_Button.clicked.connect(self.select_output_file)
@@ -67,8 +70,11 @@ class ObfuscatorGUI(QMainWindow):
         self.Obfuscate_Mode.currentTextChanged.connect(self.set_mode)
         self.Email_openfile.clicked.connect(self.select_Email_file)
         self.Email_send.clicked.connect(self.send_email)
-        self.subject_textEdit.textChanged.connect(lambda: setattr(self, 'EmailDefaultSubject', self.subject_textEdit.toPlainText()))
-        self.content_textEdit.textChanged.connect(lambda: setattr(self, 'EmailDefaultContent', self.content_textEdit.toPlainText()))
+        self.Email_refresh.clicked.connect(self.update_Email_preview)
+        self.subject_textEdit.textChanged.connect(lambda: setattr(
+            self, 'EmailDefaultSubject', self.subject_textEdit.toPlainText()))
+        self.content_textEdit.textChanged.connect(lambda: setattr(
+            self, 'EmailDefaultContent', self.content_textEdit.toPlainText()))
 
         self.groupBox_3.dragEnterEvent = self.input_dragEnterEvent
         self.groupBox_3.dragMoveEvent = self.input_dragMoveEvent
@@ -76,16 +82,22 @@ class ObfuscatorGUI(QMainWindow):
         self.groupBox_9.dragEnterEvent = self.Email_dragEnterEvent
         self.groupBox_9.dragMoveEvent = self.Email_dragMoveEvent
         self.groupBox_9.dropEvent = self.Email_dropEvent
-        
+
         # 初始化預覽
         self.update_preview()
+
+    def UpdateEmailPath(self, path):
+        self.EmailFilePath = path
+        self.Email_Filename.setText(Path(path).name)
+        self.update_Email_preview()
 
     def set_Result_Label(self, text):
         self.Result_Label.setText("執行結果:"+text)
 
     def input_path_changed(self, text):
         self.InputFilePath = text
-        self.OutputFilePath = str(Path(text).parent / f"obfuscated_{Path(text).name}")
+        self.OutputFilePath = str(
+            Path(text).parent / f"obfuscated_{Path(text).name}")
         self.OutputFile_LineEdit.setText(self.OutputFilePath)
 
     def output_path_changed(self, text):
@@ -98,7 +110,7 @@ class ObfuscatorGUI(QMainWindow):
                     event.acceptProposedAction()
                     return
         event.ignore()
-    
+
     def input_dragMoveEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
@@ -109,7 +121,8 @@ class ObfuscatorGUI(QMainWindow):
             if file_path.endswith('.py'):
                 self.InputFilePath = file_path
                 self.InputFile_LineEdit.setText(file_path)
-                self.OutputFilePath = str(Path(file_path).parent / f"obfuscated_{Path(file_path).name}")
+                self.OutputFilePath = str(
+                    Path(file_path).parent / f"obfuscated_{Path(file_path).name}")
                 self.OutputFile_LineEdit.setText(self.OutputFilePath)
                 break
 
@@ -120,7 +133,7 @@ class ObfuscatorGUI(QMainWindow):
                     event.acceptProposedAction()
                     return
         event.ignore()
-    
+
     def Email_dragMoveEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
@@ -129,17 +142,15 @@ class ObfuscatorGUI(QMainWindow):
         for url in event.mimeData().urls():
             file_path = url.toLocalFile()
             if file_path.endswith('.json'):
-                self.EmailFilePath = file_path
-                self.Email_Filename.setText(Path(file_path).name)
-                self.update_Email_preview()
+                self.UpdateEmailPath(file_path)
                 break
-        
+
     def update_Email_preview(self):
         model = self.Email_preview.model()
         model.clear()
         model.setHorizontalHeaderLabels(['名稱', '模式', '亂數範圍', '地址'])
         self.EmailQueue.clear()
-        
+
         with open(self.EmailFilePath, 'r', encoding='utf-8') as f:
             data = json.load(f)
             for i, item in enumerate(data):
@@ -152,25 +163,25 @@ class ObfuscatorGUI(QMainWindow):
                 name = item['name']    # 必要欄位
                 subject = item.get('subject', None)
                 content = item.get('content', None)
-                
+
                 if enabled:
                     # 更新表格顯示
                     if mode != 'normal' and mode != 'Normal':
                         row = [
-                            QStandardItem(name), 
-                            QStandardItem(str(fake_langs)), 
-                            QStandardItem(f"{range_val[0]}~{range_val[1]}"), 
+                            QStandardItem(name),
+                            QStandardItem(str(fake_langs)),
+                            QStandardItem(f"{range_val[0]}~{range_val[1]}"),
                             QStandardItem(email)
                         ]
                     else:
                         row = [
-                            QStandardItem(name), 
-                            QStandardItem("英數亂碼"), 
-                            QStandardItem(f"{range_val[0]}~{range_val[1]}"), 
+                            QStandardItem(name),
+                            QStandardItem("英數亂碼"),
+                            QStandardItem(f"{range_val[0]}~{range_val[1]}"),
                             QStandardItem(email)
                         ]
                     model.appendRow(row)
-                
+
                     # 更新郵件佇列
                     self.EmailQueue.append([
                         mode,
@@ -182,33 +193,37 @@ class ObfuscatorGUI(QMainWindow):
                         content
                     ])
         for i in range(4):
-            self.Email_preview.resizeColumnToContents (i)
+            self.Email_preview.resizeColumnToContents(i)
 
     def select_input_file(self):
         # 開啟文件選擇器並將選定文件路徑設置到文字框
-        self.InputFilePath, _ = QFileDialog.getOpenFileName(self, "選擇輸入文件",filter="Python Files (*.py)")
+        self.InputFilePath, _ = QFileDialog.getOpenFileName(
+            self, "選擇輸入文件", filter="Python Files (*.py)")
         if self.InputFilePath:
             self.InputFile_LineEdit.setText(self.InputFilePath)
             # 設定輸出文件路徑
-            self.OutputFilePath = str(Path(self.InputFilePath).parent / f"obfuscated_{Path(self.InputFilePath).name}")
+            self.OutputFilePath = str(
+                Path(self.InputFilePath).parent / f"obfuscated_{Path(self.InputFilePath).name}")
             self.OutputFile_LineEdit.setText(self.OutputFilePath)
-    
+
     def select_output_file(self):
         # 開啟文件保存對話框並將選定路徑設置到文字框
         if self.OutputFilePath:
-            self.OutputFilePath, _ = QFileDialog.getSaveFileName(self, "選擇輸出文件",filter="Python Files (*.py)", directory=self.OutputFilePath)
+            self.OutputFilePath, _ = QFileDialog.getSaveFileName(
+                self, "選擇輸出文件", filter="Python Files (*.py)", directory=self.OutputFilePath)
         else:
-            self.OutputFilePath, _ = QFileDialog.getSaveFileName(self, "選擇輸出文件",filter="Python Files (*.py)")
+            self.OutputFilePath, _ = QFileDialog.getSaveFileName(
+                self, "選擇輸出文件", filter="Python Files (*.py)")
         if self.OutputFilePath:
             self.OutputFile_LineEdit.setText(self.OutputFilePath)
 
     def select_Email_file(self):
         # 開啟文件選擇器並將選定文件路徑設置到文字框
-        self.EmailFilePath, _ = QFileDialog.getOpenFileName(self, "選擇Email文件",filter="JSON Files (*.json)")
+        self.EmailFilePath, _ = QFileDialog.getOpenFileName(
+            self, "選擇Email文件", filter="JSON Files (*.json)")
         if self.EmailFilePath:
-            self.Email_Filename.setText(Path(self.EmailFilePath).name)
-            self.update_Email_preview()
-    
+            self.UpdateEmailPath(self.EmailFilePath)
+
     def set_mode(self):
         # 設定混淆模式
         self.Mode = self.Obfuscate_Mode.currentText()
@@ -217,31 +232,37 @@ class ObfuscatorGUI(QMainWindow):
     def random_length(self):
         # 隨機生成長度
         self.Length_SpinBox.setValue(random.randint(10, 10000))
-    
+
     def set_length(self):
         # 設定長度
         self.Length = self.Length_SpinBox.value()
         self.update_preview()
-    
+
     def update_preview(self):
-            # faker_lang = self.faker_langs.get(self.faker_var.get())
-            if self.Obfuscate_Mode.currentText() != '隨機ascii英數':
-                fake = Faker(self.fakeLangs[self.ModeItems.index(self.Obfuscate_Mode.currentText())])
-                names = ''.join(fake.name().replace(' ', '_').replace('.','') + ('_' if i < self.Length-1 else '') for i, _ in enumerate(range(self.Length)))# for _ in range(5)
-            else:
-                letters = string.ascii_letters + string.digits
-                names = ''.join(random.choice(letters) for _ in range(self.Length))# for _ in range(5)
-            
-            # print(names)
-            self.PreView_TextBrowser.setPlainText(names)
-    
+        # faker_lang = self.faker_langs.get(self.faker_var.get())
+        if self.Obfuscate_Mode.currentText() != '隨機ascii英數':
+            fake = Faker(self.fakeLangs[self.ModeItems.index(
+                self.Obfuscate_Mode.currentText())])
+            names = ''.join(fake.name().replace(' ', '_').replace('.', '') + ('_' if i < self.Length-1 else '')
+                            for i, _ in enumerate(range(self.Length)))  # for _ in range(5)
+        else:
+            letters = string.ascii_letters + string.digits
+            names = ''.join(random.choice(letters)
+                            for _ in range(self.Length))  # for _ in range(5)
+
+        # print(names)
+        self.PreView_TextBrowser.setPlainText(names)
+
     def start_process(self):
         # 開始混淆代碼
         if self.InputFilePath and self.OutputFilePath:
             try:
                 if self.Obfuscate_Mode.currentText() != '隨機ascii英數':
-                    fake = Faker(self.fakeLangs[self.ModeItems.index(self.Obfuscate_Mode.currentText())])
-                    name_generator = lambda : ''.join(fake.name().replace(' ', '_').replace('.','') + ('_' if i < self.Length-1 else '') for i, _ in enumerate(range(self.Length)))
+                    fake = Faker(self.fakeLangs[self.ModeItems.index(
+                        self.Obfuscate_Mode.currentText())])
+
+                    def name_generator(): return ''.join(fake.name().replace(' ', '_').replace('.', '') +
+                                                         ('_' if i < self.Length-1 else '') for i, _ in enumerate(range(self.Length)))
                     ob = CodeObfuscator(
                         name_generator=name_generator,
                         length=self.Length
@@ -259,16 +280,17 @@ class ObfuscatorGUI(QMainWindow):
         else:
             self.set_Result_Label("❗錯誤❗")
             self.Result_TextBrowser.setPlainText("請設定輸入和輸出文件")
-    
+
     def send_email(self):
         if not self.InputFilePath or not self.EmailQueue:
             self.Email_Result.setText("⚠️請選擇輸入檔案和郵件清單⚠️")
             return
-            
+
         account = "5b1g0028@stust.edu.tw"
         mailer = SendMail(
             account=account,
-            password=keyring.get_password("Obfuscate_code_email_service", account)
+            password=keyring.get_password(
+                "Obfuscate_code_email_service", account)
         )
 
         # 建立工作佇列和執行緒同步鎖
@@ -287,23 +309,26 @@ class ObfuscatorGUI(QMainWindow):
                 try:
                     # 從佇列取得工作
                     mode, fakeLangs, range_val, email, name, subject, content = work_queue.get_nowait()
-                    output_file = str(Path(self.OutputFilePath).parent / f"obfuscated_{name}_{Path(self.InputFilePath).name}")
+                    output_file = str(Path(self.OutputFilePath).parent /
+                                      f"obfuscated_{name}_{Path(self.InputFilePath).name}")
 
                     try:
                         # 生成混淆後的程式碼
                         length = random.randint(range_val[0], range_val[1])
                         if mode != "normal":
                             fake = Faker(fakeLangs)
+
                             def name_generator():
                                 return ''.join(
-                                    fake.name().replace(' ', '_').replace('.','') + 
-                                    ('_' if i < length-1 else '') 
+                                    fake.name().replace(' ', '_').replace('.', '') +
+                                    ('_' if i < length-1 else '')
                                     for i in range(length)
                                 )
-                            ob = CodeObfuscator(name_generator=name_generator, length=length)
+                            ob = CodeObfuscator(
+                                name_generator=name_generator, length=length)
                         else:
                             ob = CodeObfuscator(length=length)
-                        
+
                         ob.obfuscate(self.InputFilePath, output_file)
 
                         # 發送郵件
@@ -322,7 +347,7 @@ class ObfuscatorGUI(QMainWindow):
                         if not status:
                             with status_lock:
                                 success += 1
-                        
+
                         # 清理臨時檔案
                         if os.path.exists(output_file):
                             os.remove(output_file)
