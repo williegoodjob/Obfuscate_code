@@ -159,14 +159,14 @@ class ObfuscatorGUI(QMainWindow):
                         row = [
                             QStandardItem(name), 
                             QStandardItem(str(fake_langs)), 
-                            QStandardItem(f"{range_val[0]} - {range_val[1]}"), 
+                            QStandardItem(f"{range_val[0]}~{range_val[1]}"), 
                             QStandardItem(email)
                         ]
                     else:
                         row = [
                             QStandardItem(name), 
                             QStandardItem("英數亂碼"), 
-                            QStandardItem(f"{range_val[0]} - {range_val[1]}"), 
+                            QStandardItem(f"{range_val[0]}~{range_val[1]}"), 
                             QStandardItem(email)
                         ]
                     model.appendRow(row)
@@ -181,6 +181,8 @@ class ObfuscatorGUI(QMainWindow):
                         subject,
                         content
                     ])
+        for i in range(4):
+            self.Email_preview.resizeColumnToContents (i)
 
     def select_input_file(self):
         # 開啟文件選擇器並將選定文件路徑設置到文字框
