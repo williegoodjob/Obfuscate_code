@@ -6,7 +6,6 @@ This software is licensed under the MIT License. See LICENSE for details.
 from CodeObfuscator import CodeObfuscator
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableView
-from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QStandardItemModel, QStandardItem
 from pathlib import Path
 from faker import Faker
