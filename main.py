@@ -10,12 +10,15 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableView
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QStandardItemModel, QStandardItem
 from pathlib import Path
 from faker import Faker
-import keyring
+from queue import Queue, Empty
+from threading import Lock
 import threading
+import keyring
 import random
 import string
 import json
 import os
+
 
 class ObfuscatorGUI(QMainWindow):
     def __init__(self):
@@ -171,6 +174,7 @@ class ObfuscatorGUI(QMainWindow):
                     fake_langs,
                     range_val,
                     email,
+                    name,
                     subject,
                     content
                 ])
@@ -258,81 +262,102 @@ class ObfuscatorGUI(QMainWindow):
             
         account = "5b1g0028@stust.edu.tw"
         mailer = SendMail(
-            account=account,  # 需要設定
+            account=account,
             password=keyring.get_password("Obfuscate_code_email_service", account)
         )
 
-        def send_thread():
-            try:
-                # 建立郵件發送實例
-                
-                total = len(self.EmailQueue)
-                success = 0
-                
-                for mode, fakeLangs, range_val, email, subject, content in self.EmailQueue:
-                    output_file = str(Path(self.OutputFilePath).parent / f"obfuscated_{email.split('@')[0]}_{Path(self.InputFilePath).name}")
+        # 建立工作佇列和執行緒同步鎖
+        work_queue = Queue()
+        status_lock = Lock()
+        total = len(self.EmailQueue)
+        success = 0
+
+        # 將工作加入佇列
+        for task in self.EmailQueue:
+            work_queue.put(task)
+
+        def worker():
+            nonlocal success
+            while True:
+                try:
+                    # 從佇列取得工作
+                    mode, fakeLangs, range_val, email, name, subject, content = work_queue.get_nowait()
+                    output_file = str(Path(self.OutputFilePath).parent / f"obfuscated_{name}_{Path(self.InputFilePath).name}")
 
                     try:
-                        # 確保 range_val 存在且有效
-                        if not range_val or len(range_val) < 2:
-                            range_val = [10, 10]  # 設定預設值
-                        
+                        # 生成混淆後的程式碼
                         length = random.randint(range_val[0], range_val[1])
-                        
-                        # 根據模式設定混淆器
-                        if mode != "normal":  # normal 使用預設的 ascii 英數
+                        if mode != "normal":
                             fake = Faker(fakeLangs)
                             def name_generator():
-                                name_parts = []
-                                for i in range(length):
-                                    name = fake.name().replace(' ', '_').replace('.', '')
-                                    if i < length - 1:
-                                        name += '_'
-                                    name_parts.append(name)
-                                return ''.join(name_parts)
-                            
-                            ob = CodeObfuscator(
-                                name_generator=name_generator,
-                                length=length
-                            )
+                                return ''.join(
+                                    fake.name().replace(' ', '_').replace('.','') + 
+                                    ('_' if i < length-1 else '') 
+                                    for i in range(length)
+                                )
+                            ob = CodeObfuscator(name_generator=name_generator, length=length)
                         else:
-                            ob = CodeObfuscator(
-                                length=length
-                            )
+                            ob = CodeObfuscator(length=length)
                         
-                        # 生成混淆後的程式碼
                         ob.obfuscate(self.InputFilePath, output_file)
 
-                        if subject == None:
-                            subject = self.EmailDefaultSubject
-                        if content == None:
-                            content = self.EmailDefaultContent
                         # 發送郵件
+                        if subject is None:
+                            subject = self.EmailDefaultSubject
+                        if content is None:
+                            content = self.EmailDefaultContent
+
                         status = mailer.send(
                             to=email,
                             subject=subject,
                             content=content,
                             attach_file=output_file
                         )
-                        
+
                         if not status:
-                            success += 1
-                            os.remove(output_file)
-                    except Exception as e:
+                            with status_lock:
+                                success += 1
+                        
+                        # 清理臨時檔案
                         if os.path.exists(output_file):
                             os.remove(output_file)
-                        
-                    # 更新UI
-                    self.Email_Result.setText(f"執行結果：\n處理中... {success}/{total}")
-                        
-                # 完成後更新UI
-                self.Email_Result.setText(f"執行結果：🆗完成！\n✅成功: {success}\n❌失敗: {total-success}")
-                
-            except Exception as e:
-                self.Email_Result.setText(f"執行結果：\n❌發生錯誤：\n{str(e)}")
-        
-        # 啟動執行緒
-        threading.Thread(target=send_thread, daemon=True).start()
+
+                        # 更新進度
+                        with status_lock:
+                            remaining = work_queue.qsize()
+                            self.Email_Result.setText(
+                                f"執行結果：\n處理中... {success}/{total}\n"
+                                f"剩餘: {remaining}"
+                            )
+
+                    except Exception as e:
+                        print(f"Error processing {email}: {str(e)}")
+                        if os.path.exists(output_file):
+                            os.remove(output_file)
+
+                    work_queue.task_done()
+
+                except Empty:
+                    break
+
+        # 啟動多個工作執行緒
+        threads = []
+        for _ in range(min(4, total)):  # 最多4個執行緒
+            t = threading.Thread(target=worker, daemon=True)
+            t.start()
+            threads.append(t)
+
+        # 等待所有工作完成的監控執行緒
+        def monitor():
+            for t in threads:
+                t.join()
+            self.Email_Result.setText(
+                f"執行結果：🆗完成！\n"
+                f"✅成功: {success}\n"
+                f"❌失敗: {total-success}"
+            )
+
+        threading.Thread(target=monitor, daemon=True).start()
         self.Email_Result.setText("執行結果：\n開始處理...")
 
 if __name__ == "__main__":
