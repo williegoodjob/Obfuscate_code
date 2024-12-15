@@ -143,14 +143,14 @@ class ObfuscatorGUI(QMainWindow):
                 # 處理預設值
                 mode = item.get('mode', 'normal')
                 fake_langs = item.get('fakeLangs', None)
-                range_val = item.get('range', [64, 64])
+                range_val = item.get('range', [10, 10])
                 email = item['email']  # 必要欄位
                 name = item['name']    # 必要欄位
-                subject = item.get('subject', self.EmailDefaultSubject)
-                content = item.get('content', self.EmailDefaultContent)
+                subject = item.get('subject', None)
+                content = item.get('content', None)
                 
                 # 更新表格顯示
-                if mode != 'normal':
+                if mode != 'normal' and mode != 'Normal':
                     row = [
                         QStandardItem(name), 
                         QStandardItem(str(fake_langs)), 
@@ -160,7 +160,7 @@ class ObfuscatorGUI(QMainWindow):
                 else:
                     row = [
                         QStandardItem(name), 
-                        QStandardItem(mode), 
+                        QStandardItem("英數亂碼"), 
                         QStandardItem(f"{range_val[0]} - {range_val[1]}"), 
                         QStandardItem(email)
                     ]
@@ -254,7 +254,7 @@ class ObfuscatorGUI(QMainWindow):
     
     def send_email(self):
         if not self.InputFilePath or not self.EmailQueue:
-            self.Email_Result.setText("請選擇輸入檔案和郵件清單")
+            self.Email_Result.setText("⚠️請選擇輸入檔案和郵件清單⚠️")
             return
             
         def send_thread():
@@ -276,7 +276,7 @@ class ObfuscatorGUI(QMainWindow):
                     try:
                         # 確保 range_val 存在且有效
                         if not range_val or len(range_val) < 2:
-                            range_val = [8, 12]  # 設定預設值
+                            range_val = [10, 10]  # 設定預設值
                         
                         length = random.randint(range_val[0], range_val[1])
                         
@@ -304,6 +304,10 @@ class ObfuscatorGUI(QMainWindow):
                         # 生成混淆後的程式碼
                         ob.obfuscate(self.InputFilePath, output_file)
 
+                        if subject == None:
+                            subject = self.EmailDefaultSubject
+                        if content == None:
+                            content = self.EmailDefaultContent
                         # 發送郵件
                         status = mailer.send(
                             to=email,
