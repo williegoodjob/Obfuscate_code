@@ -37,24 +37,3 @@ class SendMail:
         status = smtp.send_message(msg)
         smtp.quit()
         return status
-
-# msg = MIMEMultipart('Hello World!') # 郵件內容
-# msg['Subject'] = 'Gmail sent by Python scripts' # 郵件標題
-# msg['From'] = '5b1g0028@stust.edu.tw'
-# msg['To'] = 'willie@goodjob.idv.tw'
-
-# with open("D:\DevProgram\Project\python\obfuscated_p21x.py", 'rb') as f:
-#     content = f.read()
-# attach_file = MIMEApplication(content, Name="obfuscated_p21x.py")
-# msg.attach(attach_file)
-
-# smtp=smtplib.SMTP('smtp.gmail.com', 587)
-# smtp.ehlo()
-# smtp.starttls()
-# smtp.login('5b1g0028@stust.edu.tw','@Dz8w5uT')
-# status=smtp.send_message(msg)
-# if status=={}:
-#     print("郵件傳送成功!")
-# else:
-#     print("郵件傳送失敗!")
-# smtp.quit()
