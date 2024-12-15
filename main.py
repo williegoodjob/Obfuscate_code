@@ -133,7 +133,10 @@ class ObfuscatorGUI(QMainWindow):
         with open(self.EmailFilePath, 'r', encoding='utf-8') as f:
             data = json.load(f)
             for i, item in enumerate(data):
-                row = [QStandardItem(item['name']), QStandardItem(item['mode']), QStandardItem(f"{item['range'][0]} - {item['range'][1]}"), QStandardItem(item['email'])]
+                if item['mode'] != 'normal':
+                    row = [QStandardItem(item['name']), QStandardItem(str(item['fakeLangs'])), QStandardItem(f"{item['range'][0]} - {item['range'][1]}"), QStandardItem(item['email'])]
+                else:
+                    row = [QStandardItem(item['name']), QStandardItem(item['mode']), QStandardItem(f"{item['range'][0]} - {item['range'][1]}"), QStandardItem(item['email'])]
                 model.appendRow(row)
                 self.EmailQueue.append([item['mode'],item['fakeLangs'],item['range'],item['email']])
 
@@ -271,10 +274,10 @@ class ObfuscatorGUI(QMainWindow):
                         print(f"Error sending to {email}: {str(e)}")
                         
                 # 完成後更新UI
-                self.Email_Result.setText(f"執行結果：\n完成！\n成功: {success}\n失敗: {total-success}")
+                self.Email_Result.setText(f"執行結果：\n🆗完成！\n✅成功: {success}\n❌失敗: {total-success}")
                 
             except Exception as e:
-                self.Email_Result.setText(f"執行結果：\n發生錯誤：\n{str(e)}")
+                self.Email_Result.setText(f"執行結果：\n❌發生錯誤：\n{str(e)}")
         
         # 啟動執行緒
         threading.Thread(target=send_thread, daemon=True).start()
