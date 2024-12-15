@@ -256,20 +256,20 @@ class ObfuscatorGUI(QMainWindow):
             self.Email_Result.setText("⚠️請選擇輸入檔案和郵件清單⚠️")
             return
             
+        account = "5b1g0028@stust.edu.tw"
+        mailer = SendMail(
+            account=account,  # 需要設定
+            password=keyring.get_password("Obfuscate_code_email_service", account)
+        )
+
         def send_thread():
             try:
                 # 建立郵件發送實例
-                account = "5b1g0028@stust.edu.tw"
-                mailer = SendMail(
-                    account=account,  # 需要設定
-                    password=keyring.get_password("Obfuscate_code_email_service", account)
-                )
                 
                 total = len(self.EmailQueue)
                 success = 0
                 
                 for mode, fakeLangs, range_val, email, subject, content in self.EmailQueue:
-                    print(f"Processing {email}...")
                     output_file = str(Path(self.OutputFilePath).parent / f"obfuscated_{email.split('@')[0]}_{Path(self.InputFilePath).name}")
 
                     try:
@@ -319,7 +319,6 @@ class ObfuscatorGUI(QMainWindow):
                             success += 1
                             os.remove(output_file)
                     except Exception as e:
-                        print(f"Error processing {email}: {str(e)}")
                         if os.path.exists(output_file):
                             os.remove(output_file)
                         
