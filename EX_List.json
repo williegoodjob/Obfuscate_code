@@ -1,0 +1,41 @@
+[
+    {
+        "id": 1,
+        "name": "基本範例",
+        "email": "example1@test.com",
+        "mode": "normal"
+    },
+    {
+        "id": 2,
+        "name": "完整設定",
+        "email": "example2@test.com",
+        "mode": "Fake",
+        "fakeLangs": ["zh_TW"],
+        "range": [10, 20],
+        "subject": "客製化主旨",
+        "content": "客製化內容"
+    },
+    {
+        "id": 3,
+        "name": "日文名稱",
+        "email": "example3@test.com",
+        "mode": "Fake",
+        "fakeLangs": ["ja_JP"],
+        "range": [5, 8]
+    },
+    {
+        "id": 4,
+        "name": "多國語系",
+        "email": "example4@test.com",
+        "mode": "Fake",
+        "fakeLangs": ["zh_TW", "ja_JP", "en_US"],
+        "range": [15, 30]
+    },
+    {
+        "id": 5,
+        "name": "長變數名稱",
+        "email": "example5@test.com",
+        "mode": "normal",
+        "range": [50, 100]
+    }
+]
