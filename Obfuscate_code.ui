@@ -321,31 +321,44 @@
         <string>選擇檔案</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_3">
+      <widget class="QPushButton" name="Email_refresh">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>20</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>重新載入</string>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_12">
        <property name="geometry">
         <rect>
          <x>10</x>
          <y>60</y>
-         <width>101</width>
-         <height>21</height>
+         <width>221</width>
+         <height>51</height>
         </rect>
        </property>
-       <property name="text">
-        <string>檔案名稱：</string>
+       <property name="title">
+        <string>目前開啟檔案</string>
        </property>
-      </widget>
-      <widget class="QLabel" name="Email_Filename">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>80</y>
-         <width>101</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
+       <widget class="QLabel" name="Email_Filename">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>20</y>
+          <width>201</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_10">
