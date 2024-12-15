@@ -4,12 +4,12 @@ Copyright (c) 2024 豆伯
 This software is licensed under the MIT License. See LICENSE for details.
 """
 from CodeObfuscator import CodeObfuscator
+from SendMail import SendMail
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableView
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QStandardItemModel, QStandardItem
 from pathlib import Path
 from faker import Faker
-from SendMail import SendMail
 import keyring
 import threading
 import random
