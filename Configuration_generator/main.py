@@ -173,7 +173,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         uic.loadUi('CG.ui', self)
         self.ConfigData = []
-        self.ConfigFile = '../UserConfig/default.json'
+        self.ConfigFile = ''
         
         # 綁定檔案操作事件
         self.actionNew.triggered.connect(self.newfile)
