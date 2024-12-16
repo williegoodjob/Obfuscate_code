@@ -1,3 +1,3 @@
 @echo off
-start "" /b python main.py
+start "" pythonw main.py
 exit
