@@ -313,7 +313,7 @@
         <rect>
          <x>10</x>
          <y>20</y>
-         <width>101</width>
+         <width>81</width>
          <height>28</height>
         </rect>
        </property>
@@ -324,9 +324,9 @@
       <widget class="QPushButton" name="Email_refresh">
        <property name="geometry">
         <rect>
-         <x>130</x>
+         <x>150</x>
          <y>20</y>
-         <width>101</width>
+         <width>81</width>
          <height>28</height>
         </rect>
        </property>
@@ -359,6 +359,19 @@
          <string/>
         </property>
        </widget>
+      </widget>
+      <widget class="QPushButton" name="Email_edit">
+       <property name="geometry">
+        <rect>
+         <x>95</x>
+         <y>20</y>
+         <width>51</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>編輯</string>
+       </property>
       </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_10">
