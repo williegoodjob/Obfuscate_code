@@ -11,31 +11,18 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>設置編輯器</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="groupBox_2">
+   <widget class="QTableView" name="tableView_Overview">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>0</y>
+      <y>10</y>
       <width>1081</width>
-      <height>1111</height>
+      <height>1091</height>
      </rect>
     </property>
-    <property name="title">
-     <string>總覽</string>
-    </property>
-    <widget class="QTableView" name="tableView_Overview">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>1061</width>
-       <height>1081</height>
-      </rect>
-     </property>
-    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
