@@ -155,7 +155,7 @@ class ObfuscatorGUI(QMainWindow):
             data = json.load(f)
             for i, item in enumerate(data):
                 # 處理預設值
-                enabled = item.get('enabled', True)
+                enabled = item.get('enabled', False)
                 mode = item.get('mode', 'normal')
                 fake_langs = item.get('fakeLangs', None)
                 range_val = item.get('range', [10, 10])
