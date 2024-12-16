@@ -158,7 +158,7 @@ class ObfuscatorGUI(QMainWindow):
                 enabled = item.get('enabled', False)
                 mode = item.get('mode', 'normal')
                 fake_langs = item.get('fakeLangs', None)
-                range_val = item.get('range', [10, 10])
+                range_val = item.get('range', [5, 10])
                 email = item['email']  # 必要欄位
                 name = item['name']    # 必要欄位
                 subject = item.get('subject', None)
