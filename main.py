@@ -69,6 +69,7 @@ class ObfuscatorGUI(QMainWindow):
         self.Length_SpinBox.valueChanged.connect(self.set_length)
         self.Obfuscate_Mode.currentTextChanged.connect(self.set_mode)
         self.Email_openfile.clicked.connect(self.select_Email_file)
+        self.Email_edit.clicked.connect(lambda: os.startfile("run-config.bat"))
         self.Email_send.clicked.connect(self.send_email)
         self.Email_refresh.clicked.connect(self.update_Email_preview)
         self.subject_textEdit.textChanged.connect(lambda: setattr(
