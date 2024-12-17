@@ -84,6 +84,7 @@ class ObfuscatorGUI(QMainWindow):
         self.groupBox_9.dragMoveEvent = self.Email_dragMoveEvent
         self.groupBox_9.dropEvent = self.Email_dropEvent
 
+        self.ob = CodeObfuscator()
         # 初始化預覽
         self.update_preview()
 
@@ -228,6 +229,13 @@ class ObfuscatorGUI(QMainWindow):
     def set_mode(self):
         # 設定混淆模式
         self.Mode = self.Obfuscate_Mode.currentText()
+        if self.Mode != self.ModeItems[0]:
+                    fake = Faker(self.fakeLangs[self.ModeItems.index(self.Mode)])
+                    def name_generator(): return ''.join(fake.name().replace(' ', '_').replace('.', '') + 
+                                                         ('_' if i < self.Length-1 else '') for i, _ in enumerate(range(self.Length)))
+                    self.ob.set_name_generator(name_generator)
+        else:
+            self.ob.set_name_generator(None)
         self.update_preview()
 
     def random_length(self):
@@ -240,39 +248,15 @@ class ObfuscatorGUI(QMainWindow):
         self.update_preview()
 
     def update_preview(self):
-        # faker_lang = self.faker_langs.get(self.faker_var.get())
-        if self.Obfuscate_Mode.currentText() != '隨機ascii英數':
-            fake = Faker(self.fakeLangs[self.ModeItems.index(
-                self.Obfuscate_Mode.currentText())])
-            names = ''.join(fake.name().replace(' ', '_').replace('.', '') + ('_' if i < self.Length-1 else '')
-                            for i, _ in enumerate(range(self.Length)))  # for _ in range(5)
-        else:
-            letters = string.ascii_letters + string.digits
-            names = ''.join(random.choice(letters)
-                            for _ in range(self.Length))  # for _ in range(5)
-
-        # print(names)
-        self.PreView_TextBrowser.setPlainText(names)
+        self.ob.set_name_length(self.Length)
+        self.PreView_TextBrowser.setPlainText(self.ob.get_Preview())
 
     def start_process(self):
         # 開始混淆代碼
         if self.InputFilePath and self.OutputFilePath:
             try:
-                if self.Obfuscate_Mode.currentText() != '隨機ascii英數':
-                    fake = Faker(self.fakeLangs[self.ModeItems.index(
-                        self.Obfuscate_Mode.currentText())])
-
-                    def name_generator(): return ''.join(fake.name().replace(' ', '_').replace('.', '') +
-                                                         ('_' if i < self.Length-1 else '') for i, _ in enumerate(range(self.Length)))
-                    ob = CodeObfuscator(
-                        name_generator=name_generator,
-                        length=self.Length
-                    )
-                else:
-                    ob = CodeObfuscator(
-                        length=self.Length
-                    )
-                ob.obfuscate(self.InputFilePath, self.OutputFilePath)
+                
+                self.ob.obfuscate(self.InputFilePath, self.OutputFilePath)
                 self.set_Result_Label("✅完成✅")
                 self.Result_TextBrowser.setPlainText("無錯誤，請檢查輸出文件")
             except Exception as e:
