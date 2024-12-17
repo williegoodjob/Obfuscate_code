@@ -19,8 +19,8 @@ class CodeObfuscator:
         self.alias_names = set()
 
     # Set Function
-    def set_name_generator(self, name_generator: Callable[[], str]):
-        self.name_generator = name_generator
+    def set_name_generator(self, name_generator: Callable[[], str] = None):
+        self.name_generator = name_generator or self._default_name_generator
 
     def set_name_length(self, length: int):
         self.name_length = length
