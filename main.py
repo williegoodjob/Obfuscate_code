@@ -85,6 +85,7 @@ class ObfuscatorGUI(QMainWindow):
         self.groupBox_9.dropEvent = self.Email_dropEvent
 
         self.ob = CodeObfuscator()
+        self.fake = Faker()
         # 初始化預覽
         self.update_preview()
 
@@ -226,10 +227,9 @@ class ObfuscatorGUI(QMainWindow):
         if self.EmailFilePath:
             self.UpdateEmailPath(self.EmailFilePath)
 
-    def name_generator(self ,langs):
-        fake = Faker(langs)
+    def name_generator(self):
         return ''.join(
-            fake.name().replace(' ', '_').replace('.', '') +
+            self.fake.name().replace(' ', '_').replace('.', '') +
             ('_' if i < self.Length-1 else '')
             for i in range(self.Length)
         )
@@ -237,8 +237,9 @@ class ObfuscatorGUI(QMainWindow):
     def set_mode(self):
         # 設定混淆模式
         self.Mode = self.Obfuscate_Mode.currentText()
+        self.fake = Faker(self.fakeLangs[self.ModeItems.index(self.Mode)])
         if self.Mode != self.ModeItems[0]:
-            self.ob.set_name_generator(self.name_generator(self.fakeLangs[self.ModeItems.index(self.Mode)]))
+            self.ob.set_name_generator(self.name_generator)
         else:
             self.ob.set_name_generator(None)
         self.update_preview()
@@ -304,10 +305,14 @@ class ObfuscatorGUI(QMainWindow):
 
                     try:
                         # 生成混淆後的程式碼
+                        
                         length = random.randint(range_val[0], range_val[1])
                         Mail_ob = CodeObfuscator()
+                        self.fake = Faker(fakeLangs)
                         if mode != "normal":
-                            Mail_ob.set_name_generator(self.name_generator(fakeLangs))
+                            Mail_ob.set_name_generator(self.name_generator)
+                        else:
+                            Mail_ob.set_name_generator(None)
                         Mail_ob.set_name_length(length)
                         Mail_ob.obfuscate(self.InputFilePath, output_file)
 
@@ -357,7 +362,7 @@ class ObfuscatorGUI(QMainWindow):
             for t in threads:
                 t.join()
             self.Email_Result.setText(
-                f"執行結果：🆗完成！\n"
+                f"執行結果：結束！\n"
                 f"✅成功: {success}\n"
                 f"❌失敗: {total-success}"
             )
