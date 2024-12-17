@@ -18,6 +18,35 @@ class CodeObfuscator:
         self.name_mapping = {}
         self.alias_names = set()
 
+    # Set Function
+    def set_name_generator(self, name_generator: Callable[[], str]):
+        self.name_generator = name_generator
+
+    def set_name_length(self, length: int):
+        self.name_length = length
+
+    def set_input_file(self, input_file: str):
+        self.input_file = input_file
+
+    def set_output_file(self, output_file: str):
+        self.output_file = output_file
+
+    # Get Function
+    def isDefaultMode(self):
+        return self.name_generator == self._default_name_generator
+    
+    def get_name_Length(self):
+        return self.name_length
+    
+    def get_input_file(self):
+        return self.input_file
+    
+    def get_output_file(self):
+        return self.output_file
+    
+    def get_Preview(self):
+        return self.name_generator()
+    
     def _get_builtin_names(self):
         builtin_names = set(dir(builtins))
         builtin_names.update(keyword.kwlist)
@@ -31,7 +60,11 @@ class CodeObfuscator:
             if not new_name[0].isdigit() and new_name not in keyword.kwlist:
                 return new_name
 
-    def obfuscate(self, input_file: str, output_file: str = None):
+    def obfuscate(self, input_file: str = None, output_file: str = None):
+        if input_file is None:
+            input_file = self.input_file
+        if output_file is None:
+            output_file = self.output_file or input_file
         with open(input_file, 'r', encoding='utf-8') as f:
             source = f.read()
 
@@ -109,9 +142,6 @@ class CodeObfuscator:
         except AttributeError:
             import astor
             new_source = astor.to_source(tree)
-
-        if output_file is None:
-            output_file = input_file
 
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(new_source)
