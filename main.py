@@ -226,14 +226,19 @@ class ObfuscatorGUI(QMainWindow):
         if self.EmailFilePath:
             self.UpdateEmailPath(self.EmailFilePath)
 
+    def name_generator(self ,langs):
+        fake = Faker(langs)
+        return ''.join(
+            fake.name().replace(' ', '_').replace('.', '') +
+            ('_' if i < self.Length-1 else '')
+            for i in range(self.Length)
+        )
+    
     def set_mode(self):
         # 設定混淆模式
         self.Mode = self.Obfuscate_Mode.currentText()
         if self.Mode != self.ModeItems[0]:
-                    fake = Faker(self.fakeLangs[self.ModeItems.index(self.Mode)])
-                    def name_generator(): return ''.join(fake.name().replace(' ', '_').replace('.', '') + 
-                                                         ('_' if i < self.Length-1 else '') for i, _ in enumerate(range(self.Length)))
-                    self.ob.set_name_generator(name_generator)
+            self.ob.set_name_generator(self.name_generator(self.fakeLangs[self.ModeItems.index(self.Mode)]))
         else:
             self.ob.set_name_generator(None)
         self.update_preview()
@@ -300,32 +305,17 @@ class ObfuscatorGUI(QMainWindow):
                     try:
                         # 生成混淆後的程式碼
                         length = random.randint(range_val[0], range_val[1])
+                        Mail_ob = CodeObfuscator()
                         if mode != "normal":
-                            fake = Faker(fakeLangs)
-
-                            def name_generator():
-                                return ''.join(
-                                    fake.name().replace(' ', '_').replace('.', '') +
-                                    ('_' if i < length-1 else '')
-                                    for i in range(length)
-                                )
-                            ob = CodeObfuscator(
-                                name_generator=name_generator, length=length)
-                        else:
-                            ob = CodeObfuscator(length=length)
-
-                        ob.obfuscate(self.InputFilePath, output_file)
+                            Mail_ob.set_name_generator(self.name_generator(fakeLangs))
+                        Mail_ob.set_name_length(length)
+                        Mail_ob.obfuscate(self.InputFilePath, output_file)
 
                         # 發送郵件
-                        if subject is None:
-                            subject = self.EmailDefaultSubject
-                        if content is None:
-                            content = self.EmailDefaultContent
-
                         status = mailer.send(
                             to=email,
-                            subject=subject,
-                            content=content,
+                            subject=subject or self.EmailDefaultSubject,
+                            content=content or self.EmailDefaultContent,
                             attach_file=output_file
                         )
 
